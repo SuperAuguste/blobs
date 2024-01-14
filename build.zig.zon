@@ -1,0 +1,20 @@
+.{
+    .name = "blobs",
+    .version = "0.0.0",
+    .paths = .{
+        "README.md",
+        "blobs.zig",
+        "build.zig",
+        "build.zig.zon",
+        "music.zig",
+        "startlogo.zig",
+        "wasm4.zig",
+    },
+
+    .dependencies = .{
+        .pybadge = .{
+            .url = "https://github.com/jacobly0/pybadge/archive/94d86e52d53bd4245a566d493c7b9b21ce5bd106.tar.gz",
+            .hash = "1220a0e7b9fd4cd6d0ce704a249ab87f2a4395ece5f5d98a4032abe6537fae2ca7fc",
+        },
+    },
+}

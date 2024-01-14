@@ -1,5 +1,5 @@
 const std = @import("std");
-const w4 = @import("wasm4.zig");
+const w4 = @import("wasm4");
 const startlogo = @import("startlogo.zig");
 const music = @import("music.zig");
 const Tone = music.Tone;
@@ -120,12 +120,12 @@ pub fn panic(
     log("panic: {s}", .{msg});
     if (trace) |t| {
         w4.trace("dumping error trace...");
-        std.debug.dumpStackTrace(t.*);
+        if (@import("builtin").cpu.arch == .wasm32) std.debug.dumpStackTrace(t.*);
     } else {
         w4.trace("no error trace");
     }
     w4.trace("dumping current stack...");
-    std.debug.dumpCurrentStackTrace(ret_addr);
+    if (@import("builtin").cpu.arch == .wasm32) std.debug.dumpCurrentStackTrace(ret_addr);
     w4.trace("breakpoint");
     while (true) { @breakpoint(); }
 }
@@ -137,7 +137,7 @@ pub fn getControl(dec: bool, inc: bool) Control {
 }
 
 const angle_speed: f32 = @as(f32, std.math.pi) / @as(f32, 40);
-const _2pi = 2 * std.math.pi;
+const tau = std.math.tau;
 
 var points_buf: [5000]XY(i32) = undefined;
 
@@ -238,15 +238,15 @@ fn updateAngle(blob: *Blob, control: Control) void {
         .dec => {
             blob.angle -= angle_speed;
             if (blob.angle < 0) {
-                blob.angle += _2pi;
+                blob.angle += tau;
                 std.debug.assert(blob.angle >= 0);
             }
         },
         .inc => {
             blob.angle += angle_speed;
-            if (blob.angle > _2pi) {
-                blob.angle -= _2pi;
-                std.debug.assert(blob.angle <= _2pi);
+            if (blob.angle > tau) {
+                blob.angle -= tau;
+                std.debug.assert(blob.angle <= tau);
             }
         },
     }
@@ -467,7 +467,7 @@ fn updateStartMenu(start_menu: *StartMenu) void {
     ))
         return;
 
-    w4.tracef("random seed: %d", global.rand_seed);
+    log("random seed: {}", .{global.rand_seed});
     global.rand = std.rand.DefaultPrng.init(global.rand_seed);
     for (&points_buf) |*pt| {
         pt.* = getRandomPoint();
@@ -479,7 +479,7 @@ fn updateStartMenu(start_menu: *StartMenu) void {
         blob.* = .{
             .pos_pt = getRandomPoint(),
             .mass = starting_mass + start_boost,
-            .angle = if (is_potential_player) 0 else _2pi * getRandomScale(2),
+            .angle = if (is_potential_player) 0 else tau * getRandomScale(2),
             .dashing = false,
             .digesting = 0,
         };
@@ -654,7 +654,7 @@ fn updatePlayMode(play: *Play) void {
     }
 
     for (0 .. 4) |player_index| {
-        const gamepad = @as([*]const u8, @ptrFromInt(0x16))[player_index];
+        const gamepad = @as(*const [4]u8, @ptrCast(w4.GAMEPAD1))[player_index];
         updateAngle(&global.blobs[player_index], getControl(
             0 != (gamepad & w4.BUTTON_LEFT),
             0 != (gamepad & w4.BUTTON_RIGHT),

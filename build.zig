@@ -1,4 +1,5 @@
 const std = @import("std");
+const pybadge = @import("pybadge");
 
 pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
@@ -18,5 +19,14 @@ pub fn build(b: *std.Build) !void {
     // Export WASM-4 symbols
     lib.export_symbol_names = &[_][]const u8{ "start", "update" };
 
+    lib.addModule("wasm4", b.createModule(.{ .source_file = .{ .path = "wasm4.zig" } }));
+
     b.installArtifact(lib);
+
+    const cart = pybadge.addCart(b.dependency("pybadge", .{}), b, .{
+        .name = "blobs",
+        .source_file = .{ .path = "blobs.zig" },
+        .optimize = optimize,
+    });
+    pybadge.installCart(b, cart);
 }
