@@ -13,8 +13,8 @@
 
     .dependencies = .{
         .pybadge = .{
-            .url = "https://github.com/jacobly0/pybadge/archive/94d86e52d53bd4245a566d493c7b9b21ce5bd106.tar.gz",
-            .hash = "1220a0e7b9fd4cd6d0ce704a249ab87f2a4395ece5f5d98a4032abe6537fae2ca7fc",
+            .url = "https://github.com/SuperAuguste/sycl-badge-2024/archive/71d02f9394cebc40abd5acffad45ffd86443c6a1.tar.gz",
+            .hash = "122059e9e691318047fdf6ebb09981954aa10790be031d72ccd712ae1e63a2a284ca",
         },
     },
 }
